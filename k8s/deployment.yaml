@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eksrepo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nodejs-login-app
+  template:
+    metadata:
+      labels:
+        app: nodejs-login-app
+    spec:
+      containers:
+        - name: eksrepo
+          image: placeholder   # will be replaced automatically
+          ports:
+            - containerPort: 3000
