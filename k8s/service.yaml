@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-login-service
+  labels:
+    app: nodejs-login-app
+spec:
+  type: LoadBalancer           # Exposes the service externally with an ELB
+  selector:
+    app: nodejs-login-app
+  ports:
+    - protocol: TCP
+      port: 80                # External port
+      targetPort: 3000        # Pod container port
