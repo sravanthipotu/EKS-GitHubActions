@@ -11,8 +11,9 @@ jobs:
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      ECR_REGISTRY: 983911888147.dkr.ecr.ap-south-1.amazonaws.com/eksrepo   # <-- replace with your registry
-      ECR_REPOSITORY: eksrepo   # <-- replace with your ECR repo name (must match AWS console)
+      ECR_REGISTRY: 983911888147.dkr.ecr.ap-south-1.amazonaws.com
+ECR_REPOSITORY: eksrepo
+
 
     steps:
       - name: Configure AWS credentials
