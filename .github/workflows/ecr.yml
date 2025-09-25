@@ -1,12 +1,12 @@
-name: Build and Push to ECR
+name: Build, Push to ECR, and Deploy to EKS
 
 on:
   push:
     branches:
-      - main   # run when pushing to main branch
+      - main
 
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,14 +24,29 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build, tag, and push Docker image
         env:
           ECR_REGISTRY: 983911888147.dkr.ecr.ap-south-1.amazonaws.com
           ECR_REPOSITORY: eksrepo
           IMAGE_TAG: latest
         run: |
-          echo "Building image..."
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          echo "Pushing image..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "Image pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Configure kubectl for EKS
+        uses: aws-actions/eks-kubectl@v2
+        with:
+          cluster-name: ekscluster          # <-- Replace with your EKS cluster name
+          region: ap-south-1
+
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: 983911888147.dkr.ecr.ap-south-1.amazonaws.com
+          ECR_REPOSITORY: eksrepo
+          IMAGE_TAG: latest
+        run: |
+          # Replace image in your Kubernetes manifest
+          sed -i "s|image: .*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml
+          # Apply the manifest
+          kubectl apply -f k8s/deployment.yaml
+
