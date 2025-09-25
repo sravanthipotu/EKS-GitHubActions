@@ -2,31 +2,35 @@ name: Build and Push to ECR
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main   # only run when pushing to main branch
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_REGISTRY: 983911888147.dkr.ecr.ap-south-1.amazonaws.com/eksrepo   # <-- replace with your registry
+      ECR_REPOSITORY: eksrepo   # <-- replace with your ECR repo name (must match AWS console)
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout source
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1   # change to your region
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, Tag, and Push image
+      - name: Build, Tag, and Push Docker image
         run: |
-      ECR_REGISTRY=983911888147.dkr.ecr.ap-south-1.amazonaws.com/eksrepo
-     ECR_REPOSITORY=eksrepo
           IMAGE_TAG=latest
-           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
